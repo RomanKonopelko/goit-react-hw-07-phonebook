@@ -3,10 +3,13 @@ import Contact from './Contact'
 import { v4 as randomID } from 'uuid';
 import { connect } from 'react-redux';
 import * as actions from '../redux/contacts/contacts-actions'
+import * as selectors from '../redux/contacts/contacts-selectors'
+import operations from '../redux/contacts/contacts-operations'
 
-const Filter = ({ getFilter, onDeleteContact, filteredContacts }) =>
+const Filter = ({ getFilter, onDeleteContact, filteredContacts, isLoading }) =>
 (<>
     <label htmlFor="filter">Search contact by number or name</label>
+    {isLoading && <h2>LOADING...</h2>}
     <br />
     <input
         type="text"
@@ -25,17 +28,15 @@ const Filter = ({ getFilter, onDeleteContact, filteredContacts }) =>
 
 
 const mapStateToProps = state => {
-    const { contacts, filter } = state.contactsApp
-    const normalizeFilter = filter.toLowerCase();
-    const filteredContacts = contacts.filter(contact =>
-        contact.name.toLowerCase().includes(normalizeFilter) || contact.number.includes(filter),
-    );
-    return { filteredContacts, }
+    return {
+        filteredContacts: selectors.getFilteredContacts(state),
+        isLoading: selectors.getLoading(state)
+    }
 };
 
 const mapDispatchToProps = dispatch => {
     return {
-        onDeleteContact: id => dispatch(actions.deleteContact(id)),
+        onDeleteContact: id => dispatch(operations.deleteContact(id)),
         getFilter: value => dispatch(actions.getFilter(value)),
     };
 };
